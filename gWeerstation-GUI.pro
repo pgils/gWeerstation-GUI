@@ -24,10 +24,12 @@ CONFIG += c++11
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+    serialreader.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+    serialreader.h
 
 FORMS += \
         mainwindow.ui

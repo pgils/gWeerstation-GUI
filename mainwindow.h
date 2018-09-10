@@ -1,8 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "serialreader.h"
 #include <QMainWindow>
-#include <QtSerialPort>
 
 namespace Ui {
 class MainWindow;
@@ -17,14 +17,12 @@ public:
     ~MainWindow();
 
 private slots:
-    void openSerialPort();
-    void readData();
-
     void on_btnConnect_clicked();
+    void setValues(DataFrame data);
 
 private:
     Ui::MainWindow *ui;
-    QSerialPort *serialPort = nullptr;
+    SerialReader *serialReader = nullptr;
 };
 
 #endif // MAINWINDOW_H

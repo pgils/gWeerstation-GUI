@@ -5,50 +5,42 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow),
-    serialPort(new QSerialPort(this))
+    ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
-    connect(serialPort, &QSerialPort::readyRead, this, &MainWindow::readData);
+    serialReader = new SerialReader();
+    connect(serialReader, &SerialReader::dataReceived, this, &MainWindow::setValues);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete serialReader;
 }
 
 void MainWindow::on_btnConnect_clicked()
 {
-    openSerialPort();
-}
-
-void MainWindow::openSerialPort()
-{
-    serialPort->setPortName(ui->txtPort->text());
-    serialPort->setBaudRate(QSerialPort::Baud9600);
-    serialPort->setDataBits(QSerialPort::Data8);
-    serialPort->setParity(QSerialPort::NoParity);
-    serialPort->setStopBits(QSerialPort::OneStop);
-    serialPort->setFlowControl(QSerialPort::NoFlowControl);
-
-    if(serialPort->open(QIODevice::ReadOnly))
+    if( ! serialReader->isSerialPortOpen())
     {
-        QMessageBox::information(this, tr("Connect success!"), "Connection succeeded.");
-    } else
+        if( ! serialReader->openSerialPort(ui->txtPort->text()))
+        {
+            QMessageBox::information(this, tr("Serial connect"), "Connection failed.");
+        }
+        else
+        {
+            ui->btnConnect->setText("Disconnect");
+        }
+    }
+    else
     {
-        QMessageBox::critical(this, tr("Connect failed!"), "Connection failed.");
+        serialReader->closeSerialPort();
+        ui->btnConnect->setText("Connect ");
     }
 }
 
-void MainWindow::readData()
+void MainWindow::setValues(DataFrame data)
 {
-    //get current date and time
-    QDateTime dateTime = QDateTime::currentDateTime();
-    QString dateTimeString = dateTime.toString("hh:mm:ss.zzz");
-    ui->lblDataReceivedVal->setText(dateTimeString);
-
-    char buf;
-    serialPort->read(&buf, 1);
-    ui->lblTempVal->setText(QString::number(buf));
+    ui->lblDataReceivedVal->setText(data.timestamp);
+    ui->lblTempVal->setText(QString::number(data.temperature));
 }

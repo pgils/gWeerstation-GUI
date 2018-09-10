@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QMessageBox>
+#include <QDateTime>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -42,6 +43,11 @@ void MainWindow::openSerialPort()
 
 void MainWindow::readData()
 {
+    //get current date and time
+    QDateTime dateTime = QDateTime::currentDateTime();
+    QString dateTimeString = dateTime.toString("hh:mm:ss.zzz");
+    ui->lblDataReceivedVal->setText(dateTimeString);
+
     char buf;
     serialPort->read(&buf, 1);
     ui->lblTempVal->setText(QString::number(buf));

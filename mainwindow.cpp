@@ -39,8 +39,27 @@ void MainWindow::on_btnConnect_clicked()
     }
 }
 
+/*
+ * Calculate the relative humidity
+ * based on the formula given in the Si7021 datasheet
+ */
+double MainWindow::calcHumidity(uint16_t rawHumidity)
+{
+    return ((125.0*rawHumidity)/65536)-6;
+}
+
+/*
+ * Calculate the temperature in degrees celsius
+ * based on the formula given in the Si7021 datasheet
+ */
+double MainWindow::calcTemperature(uint16_t rawTemperature)
+{
+    return ((175.72*rawTemperature)/65536)-46.85;
+}
+
 void MainWindow::setValues(DataFrame data)
 {
     ui->lblDataReceivedVal->setText(data.timestamp);
-    ui->lblTempVal->setText(QString::number(data.temperature));
+    ui->lblTempVal->setText(QString::number(calcTemperature(data.temperature), 'f', 2));
+    ui->lblHumidityVal->setText((QString::number(calcHumidity(data.humidity), 'f', 2)));
 }

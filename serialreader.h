@@ -6,9 +6,9 @@
 
 struct DataFrame {
     QString timestamp;
-    double temperature;
-    double humidity;
-    double pressure;
+    uint16_t temperature;
+    uint16_t humidity;
+    uint16_t pressure;
 };
 
 

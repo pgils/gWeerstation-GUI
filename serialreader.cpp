@@ -40,16 +40,17 @@ bool SerialReader::isSerialPortOpen()
 
 void SerialReader::readData()
 {
-    if (serialPort->bytesAvailable() < 4)
+    if (serialPort->bytesAvailable() < 6)
         return;
 
     //get current date and time
     QDateTime dateTime = QDateTime::currentDateTime();
     data.timestamp = dateTime.toString("hh:mm:ss.zzz");
 
-    char buf[4];
-    serialPort->read(buf, 4);
-    data.temperature	= (buf[3] << 8)|(buf[2]);
+    char buf[6];
+    serialPort->read(buf, 6);
+    data.pressure		= (buf[5] << 8)|(buf[4] & 0xFF);
+    data.temperature	= (buf[3] << 8)|(buf[2] & 0xFF);
     data.humidity		= (buf[1] << 8)|(buf[0] & 0xFF); // &0xFF b/c otherwise the whole array is referenced..?
 
     emit dataReceived(data);

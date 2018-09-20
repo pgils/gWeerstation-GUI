@@ -62,4 +62,5 @@ void MainWindow::setValues(DataFrame data)
     ui->lblDataReceivedVal->setText(data.timestamp);
     ui->lblTempVal->setText(QString::number(calcTemperature(data.temperature), 'f', 2));
     ui->lblHumidityVal->setText((QString::number(calcHumidity(data.humidity), 'f', 2)));
+    ui->lblPressureVal->setText(QString::number(data.temperature, 'f', 2));
 }

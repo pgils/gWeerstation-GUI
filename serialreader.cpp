@@ -12,7 +12,7 @@ SerialReader::SerialReader(QObject *parent) :
 
 SerialReader::~SerialReader()
 {
-    delete serialPort;
+    delete serialPort; //test
 }
 
 bool SerialReader::openSerialPort(QString port)

@@ -1,66 +1,84 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <QMessageBox>
-#include <QDateTime>
+#include <iostream>
+#include <string>
+#include <QtSql>
+#include <QSqlQuery>
+#include <QtDebug>
 
+
+
+QSqlDatabase db;
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+
     ui->setupUi(this);
 
-    serialReader = new SerialReader();
-    connect(serialReader, &SerialReader::dataReceived, this, &MainWindow::setValues);
+
+
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
-    delete serialReader;
 }
 
-void MainWindow::on_btnConnect_clicked()
-{
-    if( ! serialReader->isSerialPortOpen())
+
+void connectDB(){
+    db = QSqlDatabase::addDatabase( "QMYSQL" );
+
+    db.setHostName( "pellevangils.nl" );
+    db.setUserName( "max" );
+    db.setPassword( "ByM0MK11M9igHzf6" );
+    db.setDatabaseName( "gwsTestData" );
+
+}
+void MainWindow::on_pushButton_clicked(){
+    int Temperature = 0;
+    int Humidity = 0;
+    int Pressure = 0;
+    ui->listWidget->clear();
+    QString measurement = ui->comboBox->currentText();
+    QDate date = ui->calendarWidget->selectedDate();
+    QString datum = date.toString("yyyy-MM-dd");
+    QString TestQuery = QString("SELECT %1 FROM  tblData WHERE date >= '%2 00:00:00' AND date < '%2 23:59:59'")
+                            .arg(measurement, datum);
+   connectDB();
+
+   //ui->listWidget->addItem(TestQuery);
+
+    if( !db.open() )
     {
-        if( ! serialReader->openSerialPort(ui->txtPort->text()))
-        {
-            QMessageBox::information(this, tr("Serial connect"), "Connection failed.");
+      qDebug() << db.lastError();
+    qFatal( "Failed to connect." );
+  }
+    else{
+        QSqlQuery query(TestQuery);
+        Temperature = QString::compare(measurement,"Temperature");
+        Humidity = QString::compare(measurement,"Humidity");
+        Pressure = QString::compare(measurement,"Pressure");
+        QString outputData;
+        QString data;
+         while (query.next()) {
+            data = query.value(0).toString();
+
+            if(Temperature == 0){
+                outputData = QString("%1 °C").arg(data);
+            }
+            else if(Humidity == 0){
+                 outputData = QString("%1 %").arg(data);
+            }
+            else if(Pressure == 0){
+                 outputData = QString("%1 atm").arg(data);
+            }
+            else{
+                qDebug()<<"Error getting value";
+            }
+            ui->listWidget->addItem(outputData);
+                        }
         }
-        else
-        {
-            ui->btnConnect->setText("Disconnect");
-        }
-    }
-    else
-    {
-        serialReader->closeSerialPort();
-        ui->btnConnect->setText("Connect ");
-    }
 }
 
-/*
- * Calculate the relative humidity
- * based on the formula given in the Si7021 datasheet
- */
-double MainWindow::calcHumidity(uint16_t rawHumidity)
-{
-    return ((125.0*rawHumidity)/65536)-6;
-}
-
-/*
- * Calculate the temperature in degrees celsius
- * based on the formula given in the Si7021 datasheet
- */
-double MainWindow::calcTemperature(uint16_t rawTemperature)
-{
-    return ((175.72*rawTemperature)/65536)-46.85;
-}
-
-void MainWindow::setValues(DataFrame data)
-{
-    ui->lblDataReceivedVal->setText(data.timestamp);
-    ui->lblTempVal->setText(QString::number(calcTemperature(data.temperature), 'f', 2));
-    ui->lblHumidityVal->setText((QString::number(calcHumidity(data.humidity), 'f', 2)));
-    ui->lblPressureVal->setText(QString::number(data.temperature, 'f', 2));
-}
+//WHERE date >= 00-00-%2 AND date < 59-23-%2"

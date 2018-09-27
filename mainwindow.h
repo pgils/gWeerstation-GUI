@@ -1,7 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "serialreader.h"
 #include <QMainWindow>
 
 namespace Ui {
@@ -17,14 +16,10 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_btnConnect_clicked();
-    void setValues(DataFrame data);
-    double calcHumidity(uint16_t rawHumidity);
-    double calcTemperature(uint16_t rawTemperature);
+    void on_pushButton_clicked();
 
 private:
     Ui::MainWindow *ui;
-    SerialReader *serialReader = nullptr;
 };
 
 #endif // MAINWINDOW_H

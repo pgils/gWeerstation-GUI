@@ -1,12 +1,12 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2018-09-04T00:28:37
+# Project created by QtCreator 2018-09-25T14:31:46
 #
 #-------------------------------------------------
 
-QT       += core gui widgets serialport
+QT       += core gui widgets sql
 
-TARGET = gWeerstation-GUI
+TARGET = QTWeerstation
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
@@ -24,12 +24,10 @@ CONFIG += c++11
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp \
-    serialreader.cpp
+        mainwindow.cpp
 
 HEADERS += \
-        mainwindow.h \
-    serialreader.h
+        mainwindow.h
 
 FORMS += \
         mainwindow.ui

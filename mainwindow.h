@@ -17,6 +17,7 @@ public:
 
 private slots:
     void on_pushButton_clicked();
+    void showCurrentData();
 
 private:
     Ui::MainWindow *ui;

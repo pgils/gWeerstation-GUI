@@ -9,6 +9,25 @@
 
 
 QSqlDatabase db;
+
+void connectDB(){
+    db = QSqlDatabase::addDatabase( "QMYSQL" );
+
+    db.setHostName( "pellevangils.nl" );
+    db.setUserName( "max" );
+    db.setPassword( "ByM0MK11M9igHzf6" );
+    db.setDatabaseName( "gwsTestData" );
+
+//        db.setHostName( "localhost" );
+//        db.setUserName( "root" );
+//        db.setPassword( "password" );
+//        db.setDatabaseName( "test" );
+
+
+
+}
+
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -16,6 +35,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->setupUi(this);
 
+   connectDB();
+
+    QTimer *timer = new QTimer(this);
+
+    connect(timer, SIGNAL(timeout()), this, SLOT(showCurrentData()));
+    timer->start(1000);
 
 
 }
@@ -26,16 +51,8 @@ MainWindow::~MainWindow()
 }
 
 
-void connectDB(){
-    db = QSqlDatabase::addDatabase( "QMYSQL" );
-
-    db.setHostName( "pellevangils.nl" );
-    db.setUserName( "max" );
-    db.setPassword( "ByM0MK11M9igHzf6" );
-    db.setDatabaseName( "gwsTestData" );
-
-}
 void MainWindow::on_pushButton_clicked(){
+
     int Temperature = 0;
     int Humidity = 0;
     int Pressure = 0;
@@ -45,9 +62,7 @@ void MainWindow::on_pushButton_clicked(){
     QString datum = date.toString("yyyy-MM-dd");
     QString TestQuery = QString("SELECT %1 FROM  tblData WHERE date >= '%2 00:00:00' AND date < '%2 23:59:59'")
                             .arg(measurement, datum);
-   connectDB();
 
-   //ui->listWidget->addItem(TestQuery);
 
     if( !db.open() )
     {
@@ -61,11 +76,14 @@ void MainWindow::on_pushButton_clicked(){
         Pressure = QString::compare(measurement,"Pressure");
         QString outputData;
         QString data;
+        float devision;
          while (query.next()) {
-            data = query.value(0).toString();
+            devision = (query.value(0).toFloat());
+            data.setNum(devision/10);
+
 
             if(Temperature == 0){
-                outputData = QString("%1 °C").arg(data);
+                outputData = QString("%1 °C").arg(data );
             }
             else if(Humidity == 0){
                  outputData = QString("%1 %").arg(data);
@@ -79,6 +97,50 @@ void MainWindow::on_pushButton_clicked(){
             ui->listWidget->addItem(outputData);
                         }
         }
+    db.close();
 }
 
-//WHERE date >= 00-00-%2 AND date < 59-23-%2"
+void MainWindow::showCurrentData(){
+
+
+   QString Temperature = QString("SELECT Temperature FROM  tblData ORDER BY date LIMIT 1");
+   QString Humidity = QString("SELECT Humidity FROM  tblData ORDER BY date LIMIT 1");
+   QString Pressure = QString("SELECT Pressure FROM  tblData ORDER BY date LIMIT 1");
+
+
+   QString data;
+   QString outputData;
+ui->listWidget_2->clear();
+qDebug()<<"f1";
+
+   if( !db.open() )
+   {
+     qDebug() << db.lastError();
+   qFatal( "Failed to connect." );
+ }
+   else{
+       QSqlQuery queryT(Temperature);
+         queryT.next();
+           data = queryT.value(0).toString();
+           outputData = QString("Temperature is %1 °C").arg(data);
+
+           ui->listWidget_2->addItem(outputData);
+
+           QSqlQuery queryH(Humidity);
+             queryH.next();
+               data = queryH.value(0).toString();
+               outputData = QString("Humidity is %1 %").arg(data);
+               ui->listWidget_2->addItem(outputData);
+
+               QSqlQuery queryP(Pressure);
+                 queryP.next();
+                   data = queryP.value(0).toString();
+                   outputData = QString("Pressure is %1 atm").arg(data);
+                   ui->listWidget_2->addItem(outputData);
+      }
+   db.close();
+       }
+
+
+
+
